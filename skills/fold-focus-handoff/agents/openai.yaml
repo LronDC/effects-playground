@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fold Focus Handoff"
+  short_description: "Build fixed-image fold transitions with progressive focus"
+  default_prompt: "Use $fold-focus-handoff to turn my picture into a reversible fold-open UI with fixed-image perspective and soft progressive focus, then inspect it before exporting."
