@@ -7,6 +7,11 @@
 (function (root) {
   'use strict';
   function clamp(n) { return Math.max(-1, Math.min(1, n)); }
+  function follow(value, target, elapsed) {
+    // Fast on deliberate movement, quiet near rest; elapsed time, not frame count.
+    var motion = Math.min(1, Math.abs(target - value) / 0.08);
+    return value + (target - value) * (1 - Math.exp(-elapsed / (180 - 140 * motion)));
+  }
   function tracksOff(stream) {
     if (stream && stream.getTracks) stream.getTracks().forEach(function (t) { t.stop(); });
   }
@@ -24,6 +29,7 @@
     this._bound = false;
     this._statusText = '';
     this._x = this._y = 0;
+    this._sampleAt = null;
     var self = this;
     this._visibility = function () {
       if (document.hidden) self._shutdown('页面已隐藏，摄像头已关闭');
@@ -68,6 +74,7 @@
       this._bound = false;
     }
     this._lastFace = this._candidate = null;
+    this._sampleAt = null;
     this._streak = 0;
     this._point(0, 0);
     this._status(message || '摄像头已关闭，可拖动卡片');
@@ -101,6 +108,7 @@
     this._lastFace = this._candidate = null;
     this._lastSeen = 0; this._streak = 0; this._neutral = null; this.tracking = false;
     this._x = this._y = 0;
+    this._sampleAt = null;
     var cancelled = new Promise(function (resolve) { self._cancelStart = resolve; });
     this._status('等待摄像头授权，优先前置，仅在本机处理');
     var permission;
@@ -177,8 +185,9 @@
       var began = Date.now();
       try { self._sample(began); }
       catch (error) { self._shutdown('画面读取失败，请拖动卡片'); return; }
-      // Maximum 10 samples/sec; slow hardware never queues catch-up work.
-      self._schedule(Math.max(20, 100 - (Date.now() - began)));
+      // Maximum 20 samples/sec, one timer only. Slow detectors get equal idle time.
+      var elapsed = Math.max(0, Date.now() - began);
+      self._schedule(Math.max(25, 50 - elapsed, elapsed));
     }, delay);
   };
   TiltCamera.prototype._sample = function (now) {
@@ -205,6 +214,10 @@
     this._accept(root.pico.cluster_detections(detections, 0.25), w, h, now);
   };
   TiltCamera.prototype._accept = function (detections, w, h, now) {
+    // Count missing frames too, so reacquisition cannot integrate a whole absence.
+    // Ignore repeated/backwards timestamps and cap unusually long frame gaps.
+    var elapsed = this._sampleAt === null ? 50 : Math.max(0, Math.min(100, now - this._sampleAt));
+    if (this._sampleAt === null || now > this._sampleAt) this._sampleAt = now;
     var previous = this._lastFace;
     if (previous && now - this._lastSeen > 800) previous = null;
     var best = null, bestRank = -Infinity;
@@ -228,7 +241,8 @@
       this._candidate = null; this._streak = 0;
       this._status('未检测到正脸，请看向镜头或使用拖动');
       if (!this._lastSeen || now - this._lastSeen > 350) {
-        var x = this._x * 0.65, y = this._y * 0.65;
+        var retain = Math.exp(-elapsed / 230);
+        var x = this._x * retain, y = this._y * retain;
         this._point(Math.abs(x) < 0.005 ? 0 : x, Math.abs(y) < 0.005 ? 0 : y);
       }
       return;
@@ -242,7 +256,7 @@
     if (!this._neutral) this._neutral = { x: best.x, y: best.y };
     var targetX = clamp(-(best.x - this._neutral.x) * 3.5);
     var targetY = clamp(-(best.y - this._neutral.y) * 3.5);
-    this._point(this._x + (targetX - this._x) * 0.3, this._y + (targetY - this._y) * 0.3);
+    this._point(follow(this._x, targetX, elapsed), follow(this._y, targetY, elapsed));
     this._status('正在跟随，请轻轻左右移动头部');
   };
   TiltCamera.prototype.calibrate = function () {
@@ -251,6 +265,7 @@
       return Promise.resolve(false);
     }
     this._neutral = { x: this._lastFace.x, y: this._lastFace.y };
+    this._sampleAt = Date.now();
     this._point(0, 0);
     this._status('已校准，请轻轻左右移动头部');
     return Promise.resolve(true);

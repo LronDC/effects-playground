@@ -36,6 +36,9 @@
   'use strict';
   var LIMIT = 2000000;
   var RECT = [0, 0, 1, 1], LENSES = 186, PERSPECTIVE = 1500;
+  // Preserve the approved 342px desktop scene at every responsive CSS size.
+  // Layout scales the same virtual card; it must not move the eye farther away.
+  var REFERENCE_WIDTH = 342, VIEW_DISTANCE = PERSPECTIVE / REFERENCE_WIDTH;
   var YAW = 22, PITCH = 14, RAD = Math.PI / 180;
   // Virtual lens sheet in units of one lens pitch: 186 lenses at 75 LPI
   // (0.3387 mm) make a 63 mm card. Cylinders run along the card height, their
@@ -51,10 +54,11 @@
   function viewRepeats(value) { value = +value; return isFinite(value) ? Math.round(clamp(value, 1, 3)) : 1; }
   function printEdge(value) { value = +value; return isFinite(value) ? clamp(value, EDGE, MAX_EDGE) : EDGE; }
   function glf(x) { var s = String(x); return /[.e]/.test(s) ? s : s + '.'; }
-  function pose(state) {
+  function pose(state, cssWidth) {
+    var width = +cssWidth;
     return { rx: -(state.y || 0) * PITCH, ry: (state.t || 0) * YAW,
       yaw: (state.t || 0) * YAW * RAD, pitch: (state.y || 0) * PITCH * RAD,
-      perspective: PERSPECTIVE };
+      perspective: isFinite(width) && width > 0 ? width * VIEW_DISTANCE : PERSPECTIVE };
   }
   function seedValue(n) {
     // CPU only: the same immutable material data is sampled by both renderers.
@@ -334,7 +338,8 @@
     var w=Math.max(1,Math.round(this.width*dpr)),h=Math.max(1,Math.round(this.height*dpr));
     var budget=this.quality?LIMIT:1000000;
     if(w*h>budget){var scale=Math.sqrt(budget/(w*h));w=Math.floor(w*scale);h=Math.floor(h*scale);}
-    this.canvas.width=w;this.canvas.height=h;this.dpr=dpr;this.distance=PERSPECTIVE/this.width;
+    this.canvas.width=w;this.canvas.height=h;this.dpr=dpr;
+    this.distance=VIEW_DISTANCE;this.perspective=pose({},this.width).perspective;
   };
   TiltRenderer.prototype.resize=function(w,h){this.width=Math.max(1,w);this.height=Math.max(1,h);this._size();};
   TiltRenderer.prototype.setImage=function(key,image){
@@ -462,8 +467,9 @@
     if(this.quality){this.quality=0;this.dprCap=1;this._size();this._notify('reduced');return'reduced';}
     if(this.backend==='webgl1'){this._fallback('slow-frames');return'canvas2d';}return'';
   };
-  TiltRenderer.prototype.getInfo=function(){return{backend:this.backend,width:this.canvas.width,height:this.canvas.height,dpr:this.dpr,lenses:this.lenses,distance:this.distance,quality:this.quality,contextLosses:this.contextLosses,fallbackReason:this.fallbackReason};};
+  TiltRenderer.prototype.getInfo=function(){return{backend:this.backend,width:this.canvas.width,height:this.canvas.height,dpr:this.dpr,lenses:this.lenses,distance:this.distance,perspective:this.perspective,quality:this.quality,contextLosses:this.contextLosses,fallbackReason:this.fallbackReason};};
   TiltRenderer.WINDOW=RECT.slice();TiltRenderer.MAX_TEXTURE=1024;TiltRenderer.LENSES=LENSES;TiltRenderer.lensShare=lensShare;TiltRenderer.pose=pose;TiltRenderer.roundRectPath=rounded;
+  TiltRenderer.REFERENCE_WIDTH=REFERENCE_WIDTH;TiltRenderer.VIEW_DISTANCE=VIEW_DISTANCE;
   TiltRenderer.optics={pitch:1,lpi:75,index:INDEX,thickness:THICK,radius:RADIUS,design:DESIGN,edge:EDGE,maxEdge:MAX_EDGE,register:REGISTER,
     landing:landing,printPhase:printPhase,stripB:stripB,footprintB:footprintB,eyeAt:eyeAt};
   root.TiltRenderer=TiltRenderer;

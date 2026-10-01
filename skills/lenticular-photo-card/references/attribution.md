@@ -4,10 +4,10 @@
 
 ## 引擎
 
-本次分发保留已校验 `renderer.js` 的原始字节；SHA-256：
+本次分发的 `renderer.js` 修正了响应式场景的观看距离：布局缩放不再改变相对眼距，已认可的342px桌面基准保持。圆柱面求交、折射、固定印刷配准与shader没有改写。当前引擎SHA-256：
 
 ```text
-f9486664004c0aaef4249d9e33fad844d74466fe7a657a3f07f119687b3d268f
+a6ade7a4299461d6e4d9a142798f8fcdaa6b868c8040719c4f13714dd1f270a1
 ```
 
 早期焦平面取样参考并改写自 [Stoatworks Labs Lenticular](https://github.com/stoatworks-labs/lenticular) 的 `source/Lens.h`，固定提交 `570d3d3837574f4634262115f4b0bfd37c15e4da`。现有核心使用圆柱表面求交、Snell 折射和固定观距的周期印刷配准；保留源文件 MIT 声明。[原项目交互说明](https://stoatworks-labs.com/software/lenticular/guide/) 可供对照。

@@ -35,14 +35,14 @@ function draw() {
   const width = host.clientWidth;
   if (width <= 0) return;
   renderer.resize(width, width * 4 / 3);
-  const p = TiltRenderer.pose(state);
-  support.style.perspective = p.perspective + 'px'; // 1500px
+  const p = TiltRenderer.pose(state, width);
+  support.style.perspective = p.perspective + 'px'; // width * (1500 / 342)
   card.style.transform = 'rotateX(' + p.rx + 'deg) rotateY(' + p.ry + 'deg)';
   renderer.render(state);
 }
 ```
 
-实际接入时仅在布局宽度改变时 `resize`，不要每帧重设画布；上例将依赖写在一起便于理解。禁止把截图宽度、canvas.width 或 DPR 当布局宽度：引擎以 `1500 / CSS宽度` 求相对眼距。
+实际接入时仅在布局宽度改变时 `resize`，不要每帧重设画布；上例将依赖写在一起便于理解。相对眼距固定为已认可的桌面比例 `1500 / 342`（约4.386卡宽），CSS透视距离随布局宽度同比缩放。这样手机缩小卡片时不会意外拉远虚拟眼睛、变成一条明显的换面扫线。禁止把截图宽度、canvas.width 或 DPR 当布局宽度。无宽度参数的 `pose(state)` 仅为旧调用保留1500px默认，不适合响应式外壳。
 
 保持模板 3:4 盒子、旋转顺序和原点。透视设在父容器。前层 `translateZ(1.1px)`、后层 `translateZ(-1.1px)` 与独立软影只负责实体薄片外观，不参与 A/B 选图。
 
@@ -64,7 +64,7 @@ renderer.setImage('a', out);
 ## 捕获与生命周期
 
 - `renderer.snapshot(state, width)` 返回 3:4 卡面 Canvas，宽度最多 1024。不带 DOM 的透视、背板、地面阴影，不等于完整屏幕截图。
-- `renderer.getInfo()` 返回 backend、画布尺寸、lenses、distance 等状态。`canvas2d` 是低精度回退，不报告成完整 GPU 质量。
+- `renderer.getInfo()` 返回 backend、画布尺寸、lenses、distance、perspective 等状态。`perspective / CSS宽度` 应与 `distance` 一致。`canvas2d` 是低精度回退，不报告成完整 GPU 质量。
 - 裸引擎没有公共 `destroy()`。模板的 `LenticularDemo.destroy()` 是宿主生命周期包装。接入 SPA 时停止监听、RAF、URL 与 GPU 资源，不能假设 `TiltRenderer.destroy()` 存在。
 - 保留可中断、可逆的手动操作。空闲时不必循环 RAF；页面隐藏时暂停，恢复后重绘。减弱动态偏好可以取消自动播放，但不要只关闭 CSS 转动而让光学输入继续假装转动。
 - 可包装 React/Vue 或移植 shader。先跑数值检查和相同姿态的像素对照，再改外观；不要将约 28° 写成某款镜片的标称参数。

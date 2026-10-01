@@ -8,7 +8,7 @@ import { createHash } from 'node:crypto';
 const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const templateDir = path.join(skillDir, 'assets', 'template');
 const resources = ['index.html', 'card.css', 'card.js', 'renderer.js', 'initial-images.js'];
-const rendererHash = 'f9486664004c0aaef4249d9e33fad844d74466fe7a657a3f07f119687b3d268f';
+const rendererHash = 'a6ade7a4299461d6e4d9a142798f8fcdaa6b868c8040719c4f13714dd1f270a1';
 const usage = 'Usage: node scaffold_demo.mjs OUTPUT_DIR [--image-a FILE] [--image-b FILE] [--title TEXT]';
 
 async function canonicalLocation(target) {

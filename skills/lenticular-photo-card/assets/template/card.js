@@ -42,8 +42,9 @@
     frame = 0;
     if (disposed || document.hidden || !renderer) return;
     // Both the optical renderer and the physical shell consume this same pose.
-    var pose = window.TiltRenderer.pose(state);
+    var pose = window.TiltRenderer.pose(state, renderer.width);
     card.style.transform = 'rotateX(' + pose.rx + 'deg) rotateY(' + pose.ry + 'deg)';
+    support.style.perspective = pose.perspective + 'px';
     support.style.setProperty('--shadow-x', (8 + state.t * 3) + 'px');
     support.style.setProperty('--shadow-y', (17 + state.y * 4) + 'px');
     support.style.setProperty('--shadow-sx', .98 - Math.abs(state.t) * .065);
@@ -185,7 +186,7 @@
     return {
       t: state.t, y: state.y, viewRepeats: state.viewRepeats, flipRange: state.flipRange,
       ready: ready && !disposed, loading: loading, destroyed: disposed,
-      pose: window.TiltRenderer.pose(state),
+      pose: window.TiltRenderer.pose(state, renderer ? renderer.width : undefined),
       renderer: renderer ? Object.assign({ cssWidth: renderer.width, cssHeight: renderer.height }, renderer.getInfo()) : lastInfo,
       images: { a: records.a ? JSON.parse(JSON.stringify(records.a.info)) : null, b: records.b ? JSON.parse(JSON.stringify(records.b.info)) : null },
       status: Object.assign({}, status), framePending: !!frame, drawCount: drawCount

@@ -33,7 +33,7 @@ const cardMean=(yaw,pitch,D,fn=share)=>grid.reduce((s,[i,v])=>s+fn(i,v,yaw,pitch
 function scalarLanding(u,r){const sag=r-Math.sqrt(r*r-u*u),th=Math.asin(u/r),tw=Math.asin(Math.sin(th)/n);return u-Math.tan(th-tw)*(T-sag);}
 function rms(r){let s=0,s2=0;const m=400;for(let k=0;k<m;k++){const x=scalarLanding(-.5+(k+.5)/m,r);s+=x;s2+=x*x;}return Math.sqrt(s2/m-(s/m)**2);}
 assert.equal(L,186);
-// Scene distances (CSS perspective over card width) for desktop 420 px, phone 342 px and 300 px cards.
+// Independent optical probe distances. These do not vary with responsive UI.
 const DESK=1500 / 420,PHONE=1500 / 342,SMALL=1500 / 300;
 
 // 1. Central ray: Snell at the vertex, closed form, with and without elevation.
@@ -206,5 +206,17 @@ for(const invalid of [undefined,NaN,Infinity,-Infinity,'bad',-1,0])assert.equal(
 assert.equal(O.stripB(.31,.36,O.edge,2.6),O.stripB(.31,.36,O.edge,3),'Repeat count rounds to an integer');
 assert.equal(O.stripB(.31,.36,O.edge,100),O.stripB(.31,.36,O.edge,3),'Repeat count is capped at three');
 report.repeats=repeatedZones;
+// Responsive geometry preserves the approved desktop scene, not a new print.
+assert.equal(R.REFERENCE_WIDTH,342);
+assert.equal(R.VIEW_DISTANCE,1500/342);
+const responsiveState={t:.37,y:-.2},legacyPose=R.pose(responsiveState);
+assert.equal(legacyPose.perspective,1500);
+report.responsiveGeometry=[116,198,210,300,342,420].map(cssWidth=>{
+  const p=R.pose(responsiveState,cssWidth),distance=p.perspective/cssWidth;
+  assert(Math.abs(distance-1500/342)<1e-12,'CSS perspective and optical eye must match at every width');
+  for(const key of ['rx','ry','yaw','pitch'])assert.equal(p[key],legacyPose[key]);
+  return {cssWidth,perspective:p.perspective,distance};
+});
+for(const invalid of [undefined,null,0,-1,NaN,Infinity,'bad'])assert.equal(R.pose(responsiveState,invalid).perspective,1500);
 console.log(JSON.stringify(report,null,1));
 console.log('PASS optics tests');

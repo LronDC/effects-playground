@@ -4,43 +4,43 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#e9e8e5">
-  <title>转转卡 · 一张照片的另一面</title>
+  <title>最强效果光栅卡</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="web/adapter.css">
 </head>
 <body>
   <nav class="pages-links" aria-label="Playground 导航"><a href="../">返回 Playground</a><a href="tilt-card-xhs.zip" download="tilt-card-xhs.zip">下载小工具 ZIP</a></nav>
-  <header class="masthead"><h1>转转卡<span>照片，换个角度看。</span></h1><span class="local-note">只在本机处理</span></header>
+  <header class="masthead"><h1>最强效果光栅卡</h1><span class="local-note">照片不上传</span></header>
   <main class="workspace">
     <section class="viewer" aria-label="互动卡片预览">
       <div class="stage">
         <div class="card-size">
-          <div id="card" class="card" tabindex="0" role="group" aria-label="互动照片卡。左右拖动或按方向键改变角度，Home 键看 A 面，End 键看 B 面。" aria-describedby="gesture-hint">
+          <div id="card" class="card" tabindex="0" role="group" aria-label="互动照片卡。左右拖动或按方向键改变角度，Home 键转向最左，End 键转向最右。" aria-describedby="gesture-hint">
             <div id="render-host" class="render-host"></div>
             <span id="loading" class="loading">正在装入照片…</span>
           </div>
         </div>
+        <div id="gif-result" class="gif-result" aria-label="生成的 GIF" hidden><img id="gif-image" alt="按当前照片和参数生成的循环光栅卡 GIF"></div>
       </div>
-      <div class="stage-caption"><p id="gesture-hint">左右拖动，看看另一面</p><button id="demo" class="text-button" type="button">演示一次 <span aria-hidden="true">↔</span></button></div>
+      <div class="stage-caption"><p id="gesture-hint">左右拖动，看看另一面</p><button id="demo" class="text-button" type="button">自动转动</button><button id="gif-dismiss" class="text-button" type="button" hidden>继续调整</button></div>
+      <p id="gif-result-info" class="quiet" hidden></p>
       <p id="render-status" class="quiet status-line" role="status" aria-live="polite"></p>
     </section>
 
     <aside class="editor" aria-label="卡片编辑">
-      <section class="control-section mode-section">
-        <h2>卡片质感</h2>
-        <div class="segmented" role="group" aria-label="材质模式"><button id="mode-lenticular" type="button" aria-pressed="true">双图光栅</button><button id="mode-foil" type="button" aria-pressed="false">单图镭射</button></div>
-        <p id="mode-note" class="quiet">两张照片，随着角度交替出现。</p>
-      </section>
-
-      <section class="control-section">
-        <div class="section-heading"><h2>两面照片</h2><button id="swap" class="text-button" type="button" aria-label="交换 A 面和 B 面照片">交换 A / B</button></div>
+      <div class="editor-tabs" role="tablist" aria-label="制作光栅卡">
+        <button id="tab-photos" type="button" role="tab" aria-selected="true" aria-controls="panel-photos">换照片</button>
+        <button id="tab-effects" type="button" role="tab" aria-selected="false" aria-controls="panel-effects" tabindex="-1">调效果</button>
+      </div>
+      <div class="editor-body">
+      <div id="panel-photos" role="tabpanel" aria-labelledby="tab-photos">
+      <section class="control-section photo-section">
+        <div class="section-heading"><h2>换成自己的照片</h2><button id="swap" class="text-button" type="button" aria-label="交换 A 面和 B 面照片">交换</button></div>
         <div class="photo-pair">
-          <label class="photo-slot" for="file-a"><canvas id="thumb-a" width="90" height="120" aria-hidden="true"></canvas><span class="photo-slot-text"><strong>A 面</strong><span>更换照片</span></span><input id="file-a" class="file-input" type="file" accept="image/jpeg,image/png,image/webp" aria-label="上传 A 面照片"></label>
-          <label class="photo-slot" for="file-b"><canvas id="thumb-b" width="90" height="120" aria-hidden="true"></canvas><span class="photo-slot-text"><strong>B 面</strong><span>更换照片</span></span><input id="file-b" class="file-input" type="file" accept="image/jpeg,image/png,image/webp" aria-label="上传 B 面照片"></label>
+          <label class="photo-slot" for="file-a"><canvas id="thumb-a" width="180" height="240" aria-hidden="true"></canvas><span class="photo-slot-text"><strong>更换 A 面</strong><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><input id="file-a" class="file-input" type="file" accept="image/jpeg,image/png,image/webp" aria-label="上传 A 面照片"></label>
+          <label class="photo-slot" for="file-b"><canvas id="thumb-b" width="180" height="240" aria-hidden="true"></canvas><span class="photo-slot-text"><strong>更换 B 面</strong><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span><input id="file-b" class="file-input" type="file" accept="image/jpeg,image/png,image/webp" aria-label="上传 B 面照片"></label>
         </div>
-        <p id="source-note" class="source-note" role="status">AI 样例 · 同一座城市的日与夜</p>
-        <p class="quiet file-note">JPG、PNG、WebP，单张不超过 20 MB。</p>
-        <details class="crop-details"><summary>调整照片位置</summary>
+        <details class="crop-details"><summary>裁切与位置</summary>
           <div class="crop-controls">
             <canvas id="crop-preview" class="crop-preview" width="256" height="342" role="img" aria-label="当前照片的裁切预览"></canvas>
             <div class="segmented small-segment" role="group" aria-label="选择需要裁切的一面"><button id="crop-a" type="button" aria-pressed="true">调整 A 面</button><button id="crop-b" type="button" aria-pressed="false">调整 B 面</button></div>
@@ -50,15 +50,39 @@
             <button id="crop-reset" class="text-button" type="button">重置这一面</button>
           </div>
         </details>
+        <details class="about-details"><summary>素材说明</summary><p id="source-note" class="source-note" role="status">示例梗图 · Pop Cat / popcat.click</p><p class="quiet file-note">JPG / PNG / WebP，单张 ≤ 20 MB。</p></details>
+      </section>
+      </div>
+      <div id="panel-effects" role="tabpanel" aria-labelledby="tab-effects" hidden>
+      <section class="control-section mode-section">
+        <div class="segmented" role="group" aria-label="材质模式"><button id="mode-lenticular" type="button" aria-pressed="true">双图光栅</button><button id="mode-foil" type="button" aria-pressed="false">单图镭射</button></div>
+        <p id="mode-note" class="quiet" hidden>两张照片，随着角度交替出现。</p>
       </section>
 
       <section class="control-section angle-section">
-        <label class="range-label" for="angle"><span class="field-title">查看角度</span><output id="angle-value">A 面</output></label><input id="angle" type="range" min="-100" max="100" value="-100" aria-label="卡片查看角度">
-        <div class="range-ends"><span>A 面</span><span>B 面</span></div>
+        <div id="flip-settings" class="flip-details">
+          <label class="range-label" for="view-repeats"><span>换面间隔</span><output id="view-repeats-value" for="view-repeats">约 28°</output></label>
+          <input id="view-repeats" type="range" min="1" max="3" step="1" value="1" aria-valuetext="约 28 度" aria-describedby="view-repeats-note">
+          <p id="view-repeats-note" class="quiet">角度越小，换面越频繁。</p>
+          <label class="range-label" for="flip-range"><span>过渡柔和度</span><output id="flip-range-value" for="flip-range">柔和</output></label>
+          <input id="flip-range" type="range" min="0" max="100" value="100" aria-valuetext="柔和" aria-describedby="flip-range-note">
+          <div class="range-ends" aria-hidden="true"><span>干脆</span><span>柔和</span></div>
+          <p id="flip-range-note" class="quiet" hidden>越柔和，换面时两张图重叠的范围越大。</p>
+          <button id="flip-reset" class="text-button" type="button">恢复默认</button>
+        </div>
         <div id="foil-control" hidden><label class="range-label" for="foil"><span>镭射强度</span><output id="foil-value">35%</output></label><input id="foil" type="range" min="0" max="100" value="35"></div>
+        <div class="cycle-control">
+          <label for="gif-duration">来回时长</label>
+          <select id="gif-duration" aria-describedby="gif-settings-note"><option value="2">2 秒</option><option value="3" selected>3 秒</option><option value="5">5 秒</option></select>
+        </div>
+        <p id="gif-settings-note" class="quiet">预览和 GIF 都用这组设置。</p>
+        <button id="gif-preview" type="button" hidden>预览这个节奏</button>
+        <details class="angle-details"><summary>查看角度</summary>
+          <label class="range-label" for="angle"><span>左右旋转</span><output id="angle-value">左转 22°</output></label><input id="angle" type="range" min="-100" max="100" value="-100" aria-label="卡片查看角度">
+        </details>
       </section>
-
-      <section class="camera-section">
+      </div>
+      <section class="camera-section" hidden>
         <button id="camera-toggle" class="secondary-button" type="button">试试探头看</button>
         <p class="quiet">可选前置相机 · 跟随正脸位置，不追踪眼球、不录制。</p>
         <div id="camera-panel" class="camera-panel" hidden>
@@ -68,22 +92,36 @@
         <p id="camera-status" class="quiet status-line" role="status" aria-live="polite"></p>
       </section>
 
-      <div class="save-area"><button id="save" class="primary-button" type="button" disabled>保存当前角度</button><p class="quiet">保存为静态 PNG，互动效果留在这里。</p></div>
       <p id="error" class="error" role="alert" hidden></p>
       <p id="save-status" class="quiet status-line" role="status" aria-live="polite"></p>
+      <section id="export-panel" class="export-panel" aria-labelledby="export-title" hidden>
+        <div class="section-heading"><h2 id="export-title">静态画面</h2><button id="export-close" class="text-button" type="button">收起</button></div>
+        <p id="export-note" class="quiet">静态 PNG 预览</p>
+        <img id="export-image" alt="导出的当前角度静态照片卡">
+      </section>
+      </div>
+      <div class="export-dock">
+        <button id="gif-generate" class="primary-button" type="button" disabled>生成当前效果 GIF</button>
+        <button id="gif-save" class="primary-button" type="button" hidden>保存 GIF</button>
+        <div id="gif-progress-panel" hidden>
+          <progress id="gif-progress" max="100" value="0" aria-label="GIF 生成进度"></progress>
+          <button id="gif-cancel" class="text-button" type="button">取消生成</button>
+        </div>
+        <p id="gif-status" class="quiet status-line" role="status" aria-live="polite"></p>
+        <p id="gif-save-note" class="quiet"></p>
+        <details id="gif-save-details" class="about-details" hidden><summary>保存信息</summary><p id="gif-save-diagnostic" class="quiet"></p></details>
+        <div class="save-area"><button id="save" class="text-button" type="button" disabled>静态 PNG</button></div>
+      </div>
     </aside>
   </main>
-
-  <section id="export-panel" class="export-panel" aria-labelledby="export-title" hidden>
-    <div class="section-heading"><h2 id="export-title">这一刻的角度</h2><button id="export-close" class="text-button" type="button">收起预览</button></div>
-    <p id="export-note" class="quiet">这是静态 PNG。普通浏览器中可预览；自动保存相册需要小红书小工具环境。</p>
-    <img id="export-image" alt="导出的当前角度静态照片卡">
-  </section>
-  <footer>照片不会上传。关闭页面后，本次替换和调整不会保留。<span class="pages-source-links"><a href="README.md">使用说明</a><span aria-hidden="true"> · </span><a href="THIRD_PARTY.md">来源与许可</a></span></footer>
+  <footer>离开前记得保存成品<span class="pages-source-links"><a href="README.md">使用说明</a><span aria-hidden="true"> · </span><a href="THIRD_PARTY.md">来源与许可</a></span></footer>
   <script src="renderer.js"></script>
   <script src="vendor/pico.js"></script>
   <script src="vendor/face-model.js"></script>
   <script src="camera.js"></script>
+  <script src="vendor/gifenc.js"></script>
+  <script src="gif-export.js"></script>
+  <script src="album-export.js"></script>
   <script src="app.js"></script>
   <script src="web/adapter.js"></script>
 </body>
