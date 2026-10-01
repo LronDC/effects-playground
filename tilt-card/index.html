@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e9e8e5">
+  <title>转转卡 · 一张照片的另一面</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="web/adapter.css">
+</head>
+<body>
+  <nav class="pages-links" aria-label="Playground 导航"><a href="../">返回 Playground</a><a href="tilt-card-xhs.zip" download="tilt-card-xhs.zip">下载小工具 ZIP</a></nav>
+  <header class="masthead"><h1>转转卡<span>照片，换个角度看。</span></h1><span class="local-note">只在本机处理</span></header>
+  <main class="workspace">
+    <section class="viewer" aria-label="互动卡片预览">
+      <div class="stage">
+        <div class="card-size">
+          <div id="card" class="card" tabindex="0" role="group" aria-label="互动照片卡。左右拖动或按方向键改变角度，Home 键看 A 面，End 键看 B 面。" aria-describedby="gesture-hint">
+            <div id="render-host" class="render-host"></div>
+            <span id="loading" class="loading">正在装入照片…</span>
+          </div>
+        </div>
+      </div>
+      <div class="stage-caption"><p id="gesture-hint">左右拖动，看看另一面</p><button id="demo" class="text-button" type="button">演示一次 <span aria-hidden="true">↔</span></button></div>
+      <p id="render-status" class="quiet status-line" role="status" aria-live="polite"></p>
+    </section>
+
+    <aside class="editor" aria-label="卡片编辑">
+      <section class="control-section mode-section">
+        <h2>卡片质感</h2>
+        <div class="segmented" role="group" aria-label="材质模式"><button id="mode-lenticular" type="button" aria-pressed="true">双图光栅</button><button id="mode-foil" type="button" aria-pressed="false">单图镭射</button></div>
+        <p id="mode-note" class="quiet">两张照片，随着角度交替出现。</p>
+      </section>
+
+      <section class="control-section">
+        <div class="section-heading"><h2>两面照片</h2><button id="swap" class="text-button" type="button" aria-label="交换 A 面和 B 面照片">交换 A / B</button></div>
+        <div class="photo-pair">
+          <label class="photo-slot" for="file-a"><canvas id="thumb-a" width="90" height="120" aria-hidden="true"></canvas><span class="photo-slot-text"><strong>A 面</strong><span>更换照片</span></span><input id="file-a" class="file-input" type="file" accept="image/jpeg,image/png,image/webp" aria-label="上传 A 面照片"></label>
+          <label class="photo-slot" for="file-b"><canvas id="thumb-b" width="90" height="120" aria-hidden="true"></canvas><span class="photo-slot-text"><strong>B 面</strong><span>更换照片</span></span><input id="file-b" class="file-input" type="file" accept="image/jpeg,image/png,image/webp" aria-label="上传 B 面照片"></label>
+        </div>
+        <p id="source-note" class="source-note" role="status">AI 样例 · 同一座城市的日与夜</p>
+        <p class="quiet file-note">JPG、PNG、WebP，单张不超过 20 MB。</p>
+        <details class="crop-details"><summary>调整照片位置</summary>
+          <div class="crop-controls">
+            <canvas id="crop-preview" class="crop-preview" width="256" height="342" role="img" aria-label="当前照片的裁切预览"></canvas>
+            <div class="segmented small-segment" role="group" aria-label="选择需要裁切的一面"><button id="crop-a" type="button" aria-pressed="true">调整 A 面</button><button id="crop-b" type="button" aria-pressed="false">调整 B 面</button></div>
+            <label class="range-label" for="crop-zoom"><span>缩放</span><output id="zoom-value">1.00×</output></label><input id="crop-zoom" type="range" min="100" max="250" value="100">
+            <label class="range-label" for="crop-x"><span>左右位置</span></label><input id="crop-x" type="range" min="-100" max="100" value="0">
+            <label class="range-label" for="crop-y"><span>上下位置</span></label><input id="crop-y" type="range" min="-100" max="100" value="0">
+            <button id="crop-reset" class="text-button" type="button">重置这一面</button>
+          </div>
+        </details>
+      </section>
+
+      <section class="control-section angle-section">
+        <label class="range-label" for="angle"><span class="field-title">查看角度</span><output id="angle-value">A 面</output></label><input id="angle" type="range" min="-100" max="100" value="-100" aria-label="卡片查看角度">
+        <div class="range-ends"><span>A 面</span><span>B 面</span></div>
+        <div id="foil-control" hidden><label class="range-label" for="foil"><span>镭射强度</span><output id="foil-value">35%</output></label><input id="foil" type="range" min="0" max="100" value="35"></div>
+      </section>
+
+      <section class="camera-section">
+        <button id="camera-toggle" class="secondary-button" type="button">试试探头看</button>
+        <p class="quiet">可选前置相机 · 跟随正脸位置，不追踪眼球、不录制。</p>
+        <div id="camera-panel" class="camera-panel" hidden>
+          <video id="camera-video" muted playsinline aria-label="本机前置相机预览"></video>
+          <div class="camera-actions"><button id="camera-center" class="text-button" type="button">以现在为中心</button><button id="camera-stop" class="text-button" type="button">关闭相机</button></div>
+        </div>
+        <p id="camera-status" class="quiet status-line" role="status" aria-live="polite"></p>
+      </section>
+
+      <div class="save-area"><button id="save" class="primary-button" type="button" disabled>保存当前角度</button><p class="quiet">保存为静态 PNG，互动效果留在这里。</p></div>
+      <p id="error" class="error" role="alert" hidden></p>
+      <p id="save-status" class="quiet status-line" role="status" aria-live="polite"></p>
+    </aside>
+  </main>
+
+  <section id="export-panel" class="export-panel" aria-labelledby="export-title" hidden>
+    <div class="section-heading"><h2 id="export-title">这一刻的角度</h2><button id="export-close" class="text-button" type="button">收起预览</button></div>
+    <p id="export-note" class="quiet">这是静态 PNG。普通浏览器中可预览；自动保存相册需要小红书小工具环境。</p>
+    <img id="export-image" alt="导出的当前角度静态照片卡">
+  </section>
+  <footer>照片不会上传。关闭页面后，本次替换和调整不会保留。<span class="pages-source-links"><a href="README.md">使用说明</a><span aria-hidden="true"> · </span><a href="THIRD_PARTY.md">来源与许可</a></span></footer>
+  <script src="renderer.js"></script>
+  <script src="vendor/pico.js"></script>
+  <script src="vendor/face-model.js"></script>
+  <script src="camera.js"></script>
+  <script src="app.js"></script>
+  <script src="web/adapter.js"></script>
+</body>
+</html>

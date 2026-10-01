@@ -24,11 +24,11 @@ a:focus-visible { outline: 2px solid #147963; outline-offset: 4px; }
 .glass .switcher a[aria-current="page"] { background: #d7e3be; color: #24341c; }
 .glass .switcher a:hover:not([aria-current]) { background: #414c3b; }
 .glass .demo { background: #111211; }
-@media (max-width: 650px) {
+@media (max-width: 760px) {
   .topbar { grid-template-columns: 1fr auto; gap: 12px; padding: 14px 16px 12px; }
   .brand { font-size: 15px; gap: 9px; }
   .switcher { grid-column: 1 / -1; grid-row: 2; justify-content: center; }
-  .switcher a { width: 50%; text-align: center; padding: 10px 16px; }
+  .switcher a { flex: 1; text-align: center; padding: 10px 16px; }
   .page-links { grid-column: 2; grid-row: 1; gap: 14px; font-size: 11px; }
   .hint { padding: 10px 16px; gap: 3px; flex-direction: column; font-size: 10px; }
   .demo { min-height: 610px; height: calc(100dvh - 184px); }
