@@ -1,6 +1,6 @@
 # 下一栈见 · 互动试玩
 
-[在线试玩](https://lrondc.github.io/effects-playground/) · [液体玻璃](https://lrondc.github.io/effects-playground/glass/) · [转转卡](https://lrondc.github.io/effects-playground/tilt-card/) · [Skill 原文和下载](https://lrondc.github.io/effects-playground/skill/)
+[在线试玩](https://lrondc.github.io/effects-playground/) · [液体玻璃](https://lrondc.github.io/effects-playground/glass/) · [转转卡](https://lrondc.github.io/effects-playground/tilt-card/) · [Skill 原文和下载](https://lrondc.github.io/effects-playground/skill/) · [双图光栅 Skill](https://lrondc.github.io/effects-playground/skill/lenticular-photo-card/)
 
 三个独立的网页视觉实验：开合渐进对焦、液体玻璃，以及双图光栅 / 单图镭射的转转卡。
 可以拖动、慢放、选择自己的照片。照片只在访客浏览器中处理，不会上传。

@@ -1,0 +1,4 @@
+interface:
+  display_name: "拟真光栅卡"
+  short_description: "用圆柱透镜折射与交错印刷，把任意两张照片做成可拖动的拟真光栅卡"
+  default_prompt: "使用 $lenticular-photo-card，把这两张照片做成可拖动、可换图的拟真光栅卡，保留真实换面、透镜细纹和表面反光。"

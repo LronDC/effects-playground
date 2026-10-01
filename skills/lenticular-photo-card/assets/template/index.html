@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <title>Lenticular photo card</title>
+  <link rel="stylesheet" href="card.css">
+  <script src="renderer.js" defer></script>
+  <script src="initial-images.js" defer></script>
+  <script src="card.js" defer></script>
+</head>
+<body>
+  <header class="masthead">
+    <h1 id="demo-title">Lenticular photo card</h1>
+    <p>Offline · images stay here</p>
+  </header>
+  <main class="workspace">
+    <section class="viewer" aria-label="Card preview">
+      <div class="stage">
+        <div class="card-size" id="card-size">
+          <div class="card" id="card" tabindex="0" role="group" aria-label="Interactive lenticular card" aria-describedby="gesture-help pose-readout" aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Home End">
+            <div class="render-host" id="render-host"></div>
+          </div>
+        </div>
+      </div>
+      <p class="quiet gesture-help" id="gesture-help">Drag to tilt. Focus the card and use arrow keys.</p>
+      <div class="pose-actions" aria-label="Card viewing angle">
+        <button id="tilt-left" type="button">Tilt left</button>
+        <button id="center" type="button">Center</button>
+        <button id="tilt-right" type="button">Tilt right</button>
+      </div>
+      <output id="pose-readout" class="quiet pose-readout">Yaw −11° · pitch 1°</output>
+    </section>
+    <section class="editor" aria-label="Card controls">
+      <h2>Your two images</h2>
+      <div class="photo-pair">
+        <label class="photo-slot" for="image-a">
+          <input class="file-input" id="image-a" type="file" accept="image/jpeg,image/png,image/webp">
+          <canvas id="thumb-a" width="144" height="192" aria-hidden="true"></canvas>
+          <span class="photo-slot-text"><strong>Replace A</strong><svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v14M3 10h14"/></svg></span>
+        </label>
+        <label class="photo-slot" for="image-b">
+          <input class="file-input" id="image-b" type="file" accept="image/jpeg,image/png,image/webp">
+          <canvas id="thumb-b" width="144" height="192" aria-hidden="true"></canvas>
+          <span class="photo-slot-text"><strong>Replace B</strong><svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v14M3 10h14"/></svg></span>
+        </label>
+      </div>
+      <p class="quiet image-note" id="image-note">Geometric A/B calibration patterns, not photographs.</p>
+      <p class="quiet">JPG, PNG or WebP · centered 3:4 crop</p>
+      <div class="effect-controls">
+        <label for="view-repeats">Viewing-zone repeats</label>
+        <select id="view-repeats">
+          <option value="1">1× · original spacing</option>
+          <option value="2">2× · more frequent flips</option>
+          <option value="3">3× · most frequent flips</option>
+        </select>
+        <div class="range-label"><label for="flip-range">Transition softness</label><output id="flip-range-value" for="flip-range">100%</output></div>
+        <input id="flip-range" type="range" min="0" max="1" step="0.01" value="1">
+        <div class="range-ends" aria-hidden="true"><span>Crisp</span><span>Soft</span></div>
+        <p class="quiet">Softness changes the printed strip edge, not the spacing between viewing zones.</p>
+      </div>
+      <p class="status quiet" id="status" role="status" aria-live="polite">Preparing the card…</p>
+      <p class="quiet backend-note" id="backend-note"></p>
+    </section>
+  </main>
+  <footer>A virtual lens sheet over two flat images. No camera, upload service or 3D reconstruction.</footer>
+  <noscript>This demo needs JavaScript to render and tilt the card.</noscript>
+</body>
+</html>
